@@ -1,37 +1,42 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { useField } from 'formik';
-import numero from 'src/config/numero';
+import React, { useState, useMemo, useEffect, useRef } from "react";
+import { useField } from "formik";
 // import Input from './Input';
-import { InputAdornment } from '@material-ui/core';
-import BasicInput from './BasicInput';
+import { InputAdornment } from "@material-ui/core";
+import BasicInput from "./BasicInput";
 
 function formatNumber(value) {
-  return numero.format(value);
+  if (value == null) return;
+  return Intl.NumberFormat("pt", {
+    style: "decimal",
+    minimumFractionDigits: 2
+  }).format(value);
 }
 function cleanNumber(value) {
-  return Number(value.replace(/[^0-9]/g, '')) / 100;
+  return Number(value.replace(/[^0-9]/g, "")) / 100;
 }
 
 function getPosicaoReal(pos, valorAnterior, valorNovo) {
   if (!pos) return 0;
-  if (pos === 6) return 7;
+  if (pos === 3) return 4;
   const patternNumero = /[0-9]/g;
-  const textosAntigos = valorAnterior.replace(patternNumero, '').length;
-  const textosNovos = valorNovo.replace(patternNumero, '').length;
+  const textosAntigos =
+    valorAnterior == null ? 0 : valorAnterior.replace(patternNumero, "").length;
+  const textosNovos =
+    valorNovo == null ? 0 : valorNovo.replace(patternNumero, "").length;
   return pos + (textosAntigos - textosNovos);
 }
 
 const Currency = props => {
+  const inputRef = useRef(null);
   const [field] = useField(props);
-  const { inputRef, ...other } = props;
   const [selectionStart, setSelectionStart] = useState();
   const value = useMemo(() => formatNumber(field.value), [field.value]);
+
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef && inputRef.current) {
       inputRef.current.setSelectionRange(selectionStart, selectionStart);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectionStart]);
+  }, [inputRef, selectionStart]);
 
   function handleChange(e) {
     setSelectionStart(
@@ -48,24 +53,24 @@ const Currency = props => {
 
   return (
     <input
-      {...other}
+      {...props}
       value={value}
       onChange={e => handleChange(e)}
-      ref={ref => {
-        inputRef(ref ? ref.inputElement : null);
-      }}
+      ref={inputRef}
     />
   );
 };
 
-const CurrencyInput = props => (
-  <BasicInput
-    {...props}
-    InputProps={{
-      startAdornment: <InputAdornment position="start">R$</InputAdornment>,
-      inputComponent: Currency,
-    }}
-  />
-);
+const CurrencyInput = props => {
+  return (
+    <BasicInput
+      {...props}
+      InputProps={{
+        startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+        inputComponent: Currency
+      }}
+    />
+  );
+};
 
 export default CurrencyInput;

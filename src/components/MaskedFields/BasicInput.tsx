@@ -1,6 +1,6 @@
-import React from 'react';
-import { Field, FieldProps } from 'formik';
-import { TextField, TextFieldProps } from '@material-ui/core';
+import React from "react";
+import { Field, FieldProps } from "formik";
+import { TextField, TextFieldProps } from "@material-ui/core";
 
 type BasicInput = {
   validation?: (value: string) => string | boolean;
